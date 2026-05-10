@@ -5,6 +5,7 @@ const todoRoutes = require("./routes/todoRoutes");
 
 const app = express();
 
+// CORS is intentionally narrow and controlled by environment configuration.
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "http://localhost:3000",
@@ -26,6 +27,7 @@ app.use((req, res) => {
 });
 
 app.use((error, req, res, next) => {
+  // Avoid leaking internal details to clients while keeping server logs useful.
   console.error(error);
 
   if (res.headersSent) {

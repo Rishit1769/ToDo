@@ -17,11 +17,13 @@ router.post("/register", async (req, res, next) => {
       return res.status(400).json({ message: "Password must be at least 8 characters long." });
     }
 
+    // Check uniqueness first to keep username collision errors explicit.
     const [existingUserRows] = await pool.execute("SELECT id FROM users WHERE username = ? LIMIT 1", [username]);
     if (existingUserRows.length > 0) {
       return res.status(409).json({ message: "Username is already taken." });
     }
 
+    // Salt rounds are fixed to 10 per requirement.
     const passwordHash = await bcrypt.hash(password, 10);
 
     await pool.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", [username, passwordHash]);
@@ -50,12 +52,14 @@ router.post("/login", async (req, res, next) => {
     }
 
     const user = userRows[0];
+    // Compare plaintext password with stored hash in constant-time bcrypt routine.
     const passwordMatches = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatches) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
+    // JWT expires in 24 hours, carrying only minimum identity claims.
     const token = jwt.sign(
       {
         userId: user.id,

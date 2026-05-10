@@ -4,6 +4,7 @@ const { authenticateToken } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+// All todo endpoints require a valid JWT.
 router.use(authenticateToken);
 
 router.get("/", async (req, res, next) => {
@@ -27,6 +28,7 @@ router.post("/", async (req, res, next) => {
       return res.status(400).json({ message: "Task is required." });
     }
 
+    // Always bind the task to authenticated user ID from token.
     const [insertResult] = await pool.execute("INSERT INTO todos (user_id, task) VALUES (?, ?)", [
       req.user.userId,
       task.trim(),
@@ -60,6 +62,7 @@ router.put("/:id", async (req, res, next) => {
       return res.status(404).json({ message: "Todo not found." });
     }
 
+    // Toggle current completion state without trusting client-provided status.
     const nextCompletedState = !Boolean(todoRows[0].is_completed);
 
     await pool.execute("UPDATE todos SET is_completed = ? WHERE id = ? AND user_id = ?", [

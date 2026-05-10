@@ -1,5 +1,6 @@
 const mysql = require("mysql2/promise");
 
+// Shared pool for all route handlers; mysql2 will manage connections efficiently.
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT || 3306),
@@ -12,6 +13,7 @@ const pool = mysql.createPool({
 });
 
 async function verifyDbConnection() {
+  // Ping once during startup to fail fast when DB credentials are incorrect.
   const connection = await pool.getConnection();
   try {
     await connection.ping();

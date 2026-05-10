@@ -10,6 +10,7 @@ function authenticateToken(req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
+    // The token payload is trusted only after signature and expiration checks pass.
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.user = {
       userId: payload.userId,
