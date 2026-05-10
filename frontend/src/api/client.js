@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const RUNTIME_API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL;
+const API_BASE_URL = RUNTIME_API_BASE_URL || process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 function createApiError(message, status) {
   const error = new Error(message);
