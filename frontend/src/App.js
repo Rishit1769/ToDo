@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AuthForm from "./components/AuthForm";
 import Dashboard from "./components/Dashboard";
 
@@ -7,6 +7,8 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("todo_auth_token") || "");
   const [authMode, setAuthMode] = useState("login");
   const [theme, setTheme] = useState(localStorage.getItem("todo_theme") || "light");
+  const [isTogglePulsing, setIsTogglePulsing] = useState(false);
+  const pulseTimeoutRef = useRef(null);
 
   const isAuthenticated = useMemo(() => Boolean(token), [token]);
   const isDark = theme === "dark";
@@ -14,6 +16,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem("todo_theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    return () => {
+      if (pulseTimeoutRef.current) {
+        clearTimeout(pulseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   function handleAuthSuccess(nextToken) {
     // Store JWT in localStorage per requirement.
@@ -29,6 +39,14 @@ function App() {
   }
 
   function handleThemeToggle() {
+    setIsTogglePulsing(true);
+    if (pulseTimeoutRef.current) {
+      clearTimeout(pulseTimeoutRef.current);
+    }
+    pulseTimeoutRef.current = setTimeout(() => {
+      setIsTogglePulsing(false);
+    }, 480);
+
     setTheme((previous) => (previous === "dark" ? "light" : "dark"));
   }
 
@@ -68,6 +86,11 @@ function App() {
             }`}
           >
             <span className="relative inline-block h-4 w-4" aria-hidden="true">
+              <span
+                className={`absolute inset-0 rounded-full bg-accent/55 blur-[5px] transition-opacity duration-150 ${
+                  isTogglePulsing ? "animate-ping opacity-100" : "opacity-0"
+                }`}
+              />
               <svg
                 viewBox="0 0 24 24"
                 className={`absolute inset-0 h-4 w-4 transition-all duration-500 ease-in-out ${
