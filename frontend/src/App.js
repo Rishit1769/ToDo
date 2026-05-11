@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AuthForm from "./components/AuthForm";
 import Dashboard from "./components/Dashboard";
 
@@ -6,8 +6,14 @@ function App() {
   // Persist token so refreshes keep the user in the protected dashboard.
   const [token, setToken] = useState(localStorage.getItem("todo_auth_token") || "");
   const [authMode, setAuthMode] = useState("login");
+  const [theme, setTheme] = useState(localStorage.getItem("todo_theme") || "light");
 
   const isAuthenticated = useMemo(() => Boolean(token), [token]);
+  const isDark = theme === "dark";
+
+  useEffect(() => {
+    localStorage.setItem("todo_theme", theme);
+  }, [theme]);
 
   function handleAuthSuccess(nextToken) {
     // Store JWT in localStorage per requirement.
@@ -22,18 +28,51 @@ function App() {
     setAuthMode("login");
   }
 
+  function handleThemeToggle() {
+    setTheme((previous) => (previous === "dark" ? "light" : "dark"));
+  }
+
   return (
-    <div className="min-h-screen bg-white p-4 text-black sm:p-8">
-      <main className="mx-auto grid w-full max-w-4xl gap-4 border-4 border-black bg-white p-4 sm:p-8">
-        <section className="grid gap-2 border-b-4 border-black pb-4">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Swiss Editorial Brutalism</p>
-          <h1 className="text-2xl font-bold uppercase tracking-tight sm:text-3xl">Production To-Do System</h1>
+    <div
+      className={`min-h-screen p-3 transition-colors duration-300 sm:p-8 ${
+        isDark ? "bg-[#0d1117] text-white" : "bg-[#f2f5f9] text-black"
+      }`}
+    >
+      <main
+        className={`mx-auto grid w-full max-w-5xl gap-5 border-4 p-4 shadow-brutal sm:p-8 ${
+          isDark ? "border-white bg-[#111827]" : "border-black bg-white"
+        }`}
+      >
+        <section
+          className={`grid gap-3 border-b-4 pb-4 sm:grid-cols-[1fr_auto] sm:items-end ${
+            isDark ? "border-white" : "border-black"
+          }`}
+        >
+          <div className="grid gap-1">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Personal Productivity Hub</p>
+            <h1 className="text-2xl font-bold uppercase tracking-tight sm:text-3xl">To-Do Website</h1>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleThemeToggle}
+            className={`justify-self-start border-2 px-3 py-2 font-mono text-xs uppercase tracking-[0.1em] transition-colors sm:justify-self-end ${
+              isDark ? "border-white bg-[#0d1117] text-white hover:bg-white hover:text-black" : "border-black bg-white hover:bg-black hover:text-white"
+            }`}
+          >
+            {isDark ? "Light Mode" : "Dark Mode"}
+          </button>
         </section>
 
         {isAuthenticated ? (
-          <Dashboard token={token} onLogout={handleLogout} />
+          <Dashboard token={token} onLogout={handleLogout} isDark={isDark} />
         ) : (
-          <AuthForm mode={authMode} onModeChange={setAuthMode} onAuthSuccess={handleAuthSuccess} />
+          <AuthForm
+            mode={authMode}
+            onModeChange={setAuthMode}
+            onAuthSuccess={handleAuthSuccess}
+            isDark={isDark}
+          />
         )}
       </main>
     </div>
