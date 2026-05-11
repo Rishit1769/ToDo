@@ -44,7 +44,7 @@ function AuthForm({ mode, onModeChange, onAuthSuccess, isDark }) {
 
   return (
     <section
-      className={`grid gap-6 border-4 p-5 shadow-brutal sm:p-8 ${
+      className={`grid gap-6 border-4 p-5 shadow-brutal transition-colors duration-500 sm:p-8 ${
         isDark ? "border-white bg-[#0f172a] text-white" : "border-black bg-white text-black"
       }`}
     >
